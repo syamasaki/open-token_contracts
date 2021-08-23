@@ -2,26 +2,28 @@ const OpenToken = artifacts.require('OpenToken');
 
 contract('OpenToken: Just After Minting', async (accounts) => {
 
-    it('owner can call mintAndSetTokenURI()', async () => {
+    it('owner can call mint()', async () => {
         const TokenContract = await OpenToken.deployed();
         assert(TokenContract, 'contract failed to deploy');
 
-        const response = await TokenContract.mintAndSetTokenURI(
+        const response = await TokenContract.mint(
             accounts[1], 
             1, // tokenId
             'https://example.com/tokens/1',
+            accounts[1],
             { from: accounts[0] }
         );
         assert(response.receipt.status, 'failed to mint with accounts[0]');
     });
 
-    it('non owner can not call mintAndSetTokenURI()', async() => {
+    it('non owner can not call mint()', async() => {
         const TokenContract = await OpenToken.deployed();
         try {
-            const response = await TokenContract.mintAndSetTokenURI(
+            const response = await TokenContract.mint(
                 accounts[1],
                 2,
                 'https://example.com/tokens/2',
+                accounts[1],
                 { from: accounts[1] }
             );    
         } catch (e) {
@@ -38,6 +40,32 @@ contract('OpenToken: Just After Minting', async (accounts) => {
         let tokenCreator = await TokenContract.tokenCreator(1);
         assert(tokenCreator == accounts[1], 'unexpected token creator configured');
     });
+
+    it('only owner can call setTokenCreator()', async() => {
+        const TokenContract = await OpenToken.deployed();
+
+        await TokenContract.setTokenCreator(
+            1, 
+            accounts[2], 
+            { from: accounts[0]}
+        )
+        let tokenCreator = await TokenContract.tokenCreator(1);
+        assert(tokenCreator == accounts[2], 'unexpected token creator configured');
+    })
+
+    it('non owner can not call setTokenCreator()', async () => {
+        const TokenContract = await OpenToken.deployed();
+
+        try {
+            await TokenContract.setTokenCreator(
+                1,
+                accounts[3],
+                { from: accounts[1]}
+            )
+        } catch (e) {
+            assert(e.reason == 'Ownable: caller is not the owner', 'unexpected reason failed')
+        }
+    })
 
     it('only approved account can burn the token', async() => {
         const TokenContract = await OpenToken.deployed();
@@ -61,10 +89,11 @@ contract('OpenToken: Just After Minting', async (accounts) => {
         assert(response.receipt.status, 'failed to burn with owner(accounts[1])');
 
         // approved account can burn
-        response = await TokenContract.mintAndSetTokenURI(
+        response = await TokenContract.mint(
             accounts[1], 
             1, // tokenId
             'https://example.com/tokens/1',
+            accounts[1],
             { from: accounts[0] }
         );
         await TokenContract.approve(accounts[2], 1, {from: accounts[1]});
@@ -72,10 +101,11 @@ contract('OpenToken: Just After Minting', async (accounts) => {
         assert(response.receipt.status, 'failed to burn with approvedAccount(accounts[2])');
 
         // approvedForAll account can burn
-        response = await TokenContract.mintAndSetTokenURI(
+        response = await TokenContract.mint(
             accounts[1], 
             1, // tokenId
             'https://example.com/tokens/1',
+            accounts[1],
             { from: accounts[0] }
         );
         await TokenContract.setApprovalForAll(accounts[3], true, {from: accounts[1]});
@@ -90,10 +120,11 @@ contract('OpenToken: After First Transfer', async(accounts) => {
         const TokenContract = await OpenToken.deployed();
         assert(TokenContract, 'contract failed to deploy');
 
-        const response = await TokenContract.mintAndSetTokenURI(
+        const response = await TokenContract.mint(
             accounts[1], 
             1, // tokenId
             'https://example.com/tokens/1',
+            accounts[1],
             { from: accounts[0] }
         );
         assert(response.receipt.status, 'failed to mint with accounts[0]');
@@ -192,10 +223,11 @@ contract('OpenToken: After Two Transfers', async(accounts) => {
         const TokenContract = await OpenToken.deployed();
         assert(TokenContract, 'contract failed to deploy');
 
-        let response = await TokenContract.mintAndSetTokenURI(
+        let response = await TokenContract.mint(
             accounts[1], 
             1, // tokenId
             'https://example.com/tokens/1',
+            accounts[1],
             { from: accounts[0] }
         );
         assert(response.receipt.status, 'failed to mint with accounts[0]');

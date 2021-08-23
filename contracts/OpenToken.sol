@@ -11,13 +11,13 @@ contract OpenToken is ERC721Enumerable, ERC721Burnable, ERC721URIStorage, Ownabl
     // Mapping from token ID to tokenCreator address
     mapping(uint256 => address) private _tokenCreators;
 
-    constructor() ERC721('Open Token', 'OT') Ownable() {
+    constructor() ERC721('Open Token', 'ONFT') Ownable() {
     }
 
-    function mintAndSetTokenURI(address to, uint256 tokenId, string memory _tokenURI) public onlyOwner {
+    function mint(address to, uint256 tokenId, string memory tokenURI, address tokenCreator) public onlyOwner {
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, _tokenURI);
-        _setTokenCreator(tokenId, to);
+        _setTokenURI(tokenId, tokenURI);
+        setTokenCreator(tokenId, tokenCreator);
     }
 
     function tokenURI(uint256 tokenId) public view virtual override(ERC721URIStorage, ERC721) returns (string memory){
@@ -25,7 +25,7 @@ contract OpenToken is ERC721Enumerable, ERC721Burnable, ERC721URIStorage, Ownabl
     }
 
     function tokenCreator(uint256 tokenId) public view returns (address) {
-        require(_exists(tokenId), "OceanItemToken: tokenCreator query for nonexistent token");
+        require(_exists(tokenId), "OpenToken: tokenCreator query for nonexistent token");
         return _tokenCreators[tokenId];
     }
 
@@ -33,8 +33,8 @@ contract OpenToken is ERC721Enumerable, ERC721Burnable, ERC721URIStorage, Ownabl
         super.burn(tokenId);
     }
 
-    function _setTokenCreator(uint256 tokenId, address _tokenCreator) internal {
-        require(_exists(tokenId), "OceanItemToken: tokenCreator set of nonexistent token");
+    function setTokenCreator(uint256 tokenId, address _tokenCreator) public onlyOwner {
+        require(_exists(tokenId), "OceanToken: tokenCreator set of nonexistent token");
         _tokenCreators[tokenId] = _tokenCreator;
     }
 
