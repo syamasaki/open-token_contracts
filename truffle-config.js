@@ -47,9 +47,21 @@
       network_id: "5777",       // Any network (default: none)
     },
     ropsten: {
-      provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/4917be28fd0f44d3abb75d601feb0816'),
-      network_id: 3
-    }
+      provider: () => new HDWalletProvider(mnemonic, 'wss://ropsten.infura.io/ws/v3/2ff857966ea94f6fa863b1a8af74fecc'),
+      network_id: 3,
+      gas: 8000000,
+      confirmation: 2,
+      timeoutBlocks: 1000,
+      websockets: true
+    },
+    rinkeby: {
+      provider: () => new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws/v3/2ff857966ea94f6fa863b1a8af74fecc'),
+      network_id: 4,
+      gas: 8000000,
+      confirmation: 2,
+      timeoutBlocks: 1000,
+      websockets: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
